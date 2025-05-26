@@ -21,6 +21,7 @@ import {
   ShieldX,
   ShieldCheck,
 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 export function VerifyPropertyForm() {
   const [tokenId, setTokenId] = useState('');
@@ -163,10 +164,14 @@ export function VerifyPropertyForm() {
               className='px-10'
               required
             />
-            {/* <Info
-              className='absolute right-3 top-2.5 w-4 h-4 text-muted-foreground'
-              title='Enter the token ID of the property you want to verify'
-            /> */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className='absolute right-3 top-2.5 w-4 h-4 text-muted-foreground cursor-pointer' />
+              </TooltipTrigger>
+              <TooltipContent>
+                Enter the token ID of the property you want to verify
+              </TooltipContent>
+            </Tooltip>
           </div>
           <p className='text-sm text-muted-foreground'>
             Enter the token ID of the property to verify

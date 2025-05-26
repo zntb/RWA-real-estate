@@ -14,6 +14,7 @@ import {
   AlertCircle,
   ShieldCheck,
 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 export function AddVerifierForm() {
   const [verifierAddress, setVerifierAddress] = useState('');
@@ -64,10 +65,14 @@ export function AddVerifierForm() {
               className='px-10'
               required
             />
-            {/* <Info
-              className='absolute right-3 top-2.5 w-4 h-4 text-muted-foreground'
-              // title='Ethereum address of the account to add as a verifier'
-            /> */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className='absolute right-3 top-2.5 w-4 h-4 text-muted-foreground cursor-pointer' />
+              </TooltipTrigger>
+              <TooltipContent>
+                Ethereum address of the account to add as a verifier
+              </TooltipContent>
+            </Tooltip>
           </div>
           <p className='text-sm text-muted-foreground'>
             Enter the wallet address to grant verification privileges

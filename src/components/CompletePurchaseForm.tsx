@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Info, Loader2, CheckCheck } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 export function CompletePurchaseForm() {
   const [tokenId, setTokenId] = useState('');
@@ -102,10 +103,14 @@ export function CompletePurchaseForm() {
                 onChange={e => setTokenId(e.target.value)}
                 required
               />
-              <Info
-                className='absolute right-2 top-2 h-4 w-4 text-muted-foreground'
-                title='Enter the token ID of the property'
-              />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className='absolute right-3 top-2.5 w-4 h-4 text-muted-foreground cursor-pointer' />
+                </TooltipTrigger>
+                <TooltipContent>
+                  Enter the token ID of the property
+                </TooltipContent>
+              </Tooltip>
             </div>
             <p className='text-sm text-muted-foreground mt-1'>
               Enter the token ID of the property to complete purchase.

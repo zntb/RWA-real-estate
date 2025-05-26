@@ -14,6 +14,11 @@ import {
   AlertCircle,
   ShieldOff,
 } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from '@/components/ui/tooltip';
 
 export function RemoveVerifierForm() {
   const [verifierAddress, setVerifierAddress] = useState('');
@@ -66,10 +71,14 @@ export function RemoveVerifierForm() {
               className='px-10'
               required
             />
-            {/* <Info
-              className='absolute right-3 top-2.5 w-4 h-4 text-muted-foreground'
-              // title='Ethereum address of the verifier to remove'
-            /> */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className='absolute right-3 top-2.5 w-4 h-4 text-muted-foreground cursor-pointer' />
+              </TooltipTrigger>
+              <TooltipContent>
+                Ethereum address of the verifier to remove
+              </TooltipContent>
+            </Tooltip>
           </div>
           <p className='text-sm text-muted-foreground'>
             Enter the wallet address to revoke verification privileges
