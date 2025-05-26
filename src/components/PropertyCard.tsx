@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -7,18 +7,18 @@ import {
   CardMedia,
   Chip,
   Divider,
-} from "@mui/material";
-import HouseIcon from "@mui/icons-material/House";
-import VerifiedIcon from "@mui/icons-material/Verified";
-import type { Property } from "../engine/GetPropertiesUtils";
+} from '@mui/material';
+import HouseIcon from '@mui/icons-material/House';
+import VerifiedIcon from '@mui/icons-material/Verified';
+import type { Property } from '../engine/GetPropertiesUtils';
 
 // Map from PropertyState enum values to human-readable status and colors
 const propertyStates = {
-  0: { label: "Initial Offering", color: "info" },
-  1: { label: "For Sale", color: "success" },
-  2: { label: "Pending Sale", color: "warning" },
-  3: { label: "Sold", color: "error" },
-  4: { label: "Not For Sale", color: "default" },
+  0: { label: 'Initial Offering', color: 'info' },
+  1: { label: 'For Sale', color: 'success' },
+  2: { label: 'Pending Sale', color: 'warning' },
+  3: { label: 'Sold', color: 'error' },
+  4: { label: 'Not For Sale', color: 'default' },
 };
 
 interface PropertyCardProps {
@@ -30,17 +30,18 @@ interface PropertyCardProps {
 // Helper function to convert IPFS URLs to CDN URLs
 const convertIPFSToCDN = (ipfsUrl: string): string => {
   const clientId = import.meta.env.VITE_THIRDWEB_CLIENT_ID;
-  return ipfsUrl.replace("ipfs://", `https://${clientId}.ipfscdn.io/ipfs/`);
+  return ipfsUrl.replace('ipfs://', `https://${clientId}.ipfscdn.io/ipfs/`);
 };
 
 // Helper function to fetch metadata from IPFS
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const fetchMetadataFromIPFS = async (ipfsUri: string): Promise<any> => {
   try {
     const url = convertIPFSToCDN(ipfsUri);
     const response = await fetch(url);
     return await response.json();
   } catch (error) {
-    console.error("Error fetching metadata:", error);
+    console.error('Error fetching metadata:', error);
     return null;
   }
 };
@@ -52,65 +53,65 @@ export const PropertyCard = ({
 }: PropertyCardProps) => {
   // State to track image loading status
   const [imageError, setImageError] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string>("");
+  const [imageUrl, setImageUrl] = useState<string>('');
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
 
   // Load and process the metadata
   useEffect(() => {
     if (!property.imageURI) {
-      setImageUrl("");
+      setImageUrl('');
       return;
     }
 
     const loadImage = async () => {
       setIsLoadingMetadata(true);
-      console.log("Raw imageURI:", property.imageURI);
+      console.log('Raw imageURI:', property.imageURI);
 
       try {
         // First check if the imageURI is a direct IPFS path
-        if (property.imageURI.startsWith("ipfs://")) {
+        if (property.imageURI.startsWith('ipfs://')) {
           // Try to fetch metadata first - the URI might point to a metadata JSON
           try {
             const metadata = await fetchMetadataFromIPFS(property.imageURI);
-            console.log("Fetched metadata:", metadata);
+            console.log('Fetched metadata:', metadata);
 
             // Check for expected metadata structure
             if (metadata && metadata.data && metadata.data.image) {
               const url = convertIPFSToCDN(metadata.data.image);
-              console.log("Using metadata.data.image URL:", url);
+              console.log('Using metadata.data.image URL:', url);
               setImageUrl(url);
             } else if (metadata && metadata.image) {
               const url = convertIPFSToCDN(metadata.image);
-              console.log("Using metadata.image URL:", url);
+              console.log('Using metadata.image URL:', url);
               setImageUrl(url);
             } else {
               // Just use the original URI as the image source
               const url = convertIPFSToCDN(property.imageURI);
               console.log(
-                "Using direct imageURI URL (no image in metadata):",
-                url
+                'Using direct imageURI URL (no image in metadata):',
+                url,
               );
               setImageUrl(url);
             }
           } catch (metadataError) {
             console.log(
-              "Error fetching metadata, using URI directly:",
-              metadataError
+              'Error fetching metadata, using URI directly:',
+              metadataError,
             );
             const url = convertIPFSToCDN(property.imageURI);
             console.log(
-              "Using direct imageURI URL (failed to fetch metadata):",
-              url
+              'Using direct imageURI URL (failed to fetch metadata):',
+              url,
             );
             setImageUrl(url);
           }
         } else {
           // Non-IPFS URI, use directly
-          console.log("Using non-IPFS imageURI directly:", property.imageURI);
+          console.log('Using non-IPFS imageURI directly:', property.imageURI);
           setImageUrl(property.imageURI);
         }
       } catch (error) {
-        console.error("Error processing imageURI:", error);
+        console.error('Error processing imageURI:', error);
       } finally {
         setIsLoadingMetadata(false);
       }
@@ -122,7 +123,7 @@ export const PropertyCard = ({
 
   // Log the final image URL when it changes
   useEffect(() => {
-    console.log("Final image URL being used:", imageUrl);
+    console.log('Final image URL being used:', imageUrl);
   }, [imageUrl]);
 
   // Format Ethereum price for display with proper decimals
@@ -134,68 +135,68 @@ export const PropertyCard = ({
   // Get property state info
   const stateInfo = propertyStates[
     property.state as keyof typeof propertyStates
-  ] || { label: "Unknown", color: "default" };
+  ] || { label: 'Unknown', color: 'default' };
 
   return (
     <Card
-      variant="outlined"
+      variant='outlined'
       sx={{
-        height: "100%",
-        cursor: onCardClick ? "pointer" : "default",
-        border: isSelected ? "2px solid" : "1px solid",
-        borderColor: isSelected ? "primary.main" : "divider",
-        transition: "transform 0.2s ease-in-out",
-        "&:hover": onCardClick ? { transform: "scale(1.02)" } : {},
-        position: "relative",
-        overflow: "visible",
+        height: '100%',
+        cursor: onCardClick ? 'pointer' : 'default',
+        border: isSelected ? '2px solid' : '1px solid',
+        borderColor: isSelected ? 'primary.main' : 'divider',
+        transition: 'transform 0.2s ease-in-out',
+        '&:hover': onCardClick ? { transform: 'scale(1.02)' } : {},
+        position: 'relative',
+        overflow: 'visible',
       }}
       onClick={() => onCardClick?.(property)}
     >
       {/* Show verification status with badge */}
       {property.verifier &&
-        property.verifier !== "0x0000000000000000000000000000000000000000" && (
+        property.verifier !== '0x0000000000000000000000000000000000000000' && (
           <Box
             sx={{
-              position: "absolute",
+              position: 'absolute',
               top: -10,
               right: -10,
               zIndex: 1,
-              backgroundColor: "#fff",
-              borderRadius: "50%",
+              backgroundColor: '#fff',
+              borderRadius: '50%',
               boxShadow: 2,
             }}
           >
-            <VerifiedIcon color="primary" fontSize="medium" />
+            <VerifiedIcon color='primary' fontSize='medium' />
           </Box>
         )}
 
       {/* Property Image or Placeholder */}
       {!imageError && imageUrl ? (
         <CardMedia
-          component="img"
-          height="140"
+          component='img'
+          height='140'
           image={imageUrl}
           alt={property.propertyAddress}
-          sx={{ objectFit: "cover" }}
+          sx={{ objectFit: 'cover' }}
           onError={() => setImageError(true)}
         />
       ) : (
         <Box
           sx={{
-            position: "relative",
+            position: 'relative',
             height: 140,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            bgcolor: "action.hover",
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: 'action.hover',
           }}
         >
           {isLoadingMetadata ? (
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant='body2' color='text.secondary'>
               Loading...
             </Typography>
           ) : (
-            <HouseIcon sx={{ fontSize: 80, color: "text.secondary" }} />
+            <HouseIcon sx={{ fontSize: 80, color: 'text.secondary' }} />
           )}
         </Box>
       )}
@@ -205,25 +206,25 @@ export const PropertyCard = ({
         label={stateInfo.label}
         color={
           stateInfo.color as
-            | "success"
-            | "info"
-            | "warning"
-            | "error"
-            | "default"
+            | 'success'
+            | 'info'
+            | 'warning'
+            | 'error'
+            | 'default'
         }
-        size="small"
+        size='small'
         sx={{
-          position: "absolute",
+          position: 'absolute',
           top: 10,
           right: 10,
-          fontWeight: "bold",
+          fontWeight: 'bold',
         }}
       />
 
       <CardContent>
         {/* Property Address */}
         <Typography
-          variant="h6"
+          variant='h6'
           gutterBottom
           noWrap
           title={property.propertyAddress}
@@ -234,32 +235,32 @@ export const PropertyCard = ({
         <Divider sx={{ my: 1 }} />
 
         {/* Property Details */}
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
-          <Typography variant="body2" color="text.secondary">
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+          <Typography variant='body2' color='text.secondary'>
             Price:
           </Typography>
-          <Typography variant="body2" fontWeight="bold">
+          <Typography variant='body2' fontWeight='bold'>
             {formatEthPrice(property.price)}
           </Typography>
         </Box>
 
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
-          <Typography variant="body2" color="text.secondary">
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+          <Typography variant='body2' color='text.secondary'>
             Area:
           </Typography>
-          <Typography variant="body2">
+          <Typography variant='body2'>
             {property.squareMeters.toString()} m²
           </Typography>
         </Box>
 
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
-          <Typography variant="body2" color="text.secondary">
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+          <Typography variant='body2' color='text.secondary'>
             Legal ID:
           </Typography>
           <Typography
-            variant="body2"
+            variant='body2'
             noWrap
-            sx={{ maxWidth: "150px" }}
+            sx={{ maxWidth: '150px' }}
             title={property.legalIdentifier}
           >
             {property.legalIdentifier}
@@ -269,31 +270,31 @@ export const PropertyCard = ({
         {/* Document Hash */}
         {property.documentHash && (
           <Box
-            sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}
+            sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}
           >
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant='body2' color='text.secondary'>
               Document:
             </Typography>
             <Typography
-              variant="body2"
+              variant='body2'
               noWrap
               sx={{
-                maxWidth: "150px",
-                cursor: property.documentHash.startsWith("ipfs://")
-                  ? "pointer"
-                  : "default",
-                color: property.documentHash.startsWith("ipfs://")
-                  ? "primary.main"
-                  : "text.primary",
-                textDecoration: property.documentHash.startsWith("ipfs://")
-                  ? "underline"
-                  : "none",
+                maxWidth: '150px',
+                cursor: property.documentHash.startsWith('ipfs://')
+                  ? 'pointer'
+                  : 'default',
+                color: property.documentHash.startsWith('ipfs://')
+                  ? 'primary.main'
+                  : 'text.primary',
+                textDecoration: property.documentHash.startsWith('ipfs://')
+                  ? 'underline'
+                  : 'none',
               }}
               title={property.documentHash}
               onClick={() => {
-                if (property.documentHash.startsWith("ipfs://")) {
+                if (property.documentHash.startsWith('ipfs://')) {
                   const url = convertIPFSToCDN(property.documentHash);
-                  window.open(url, "_blank");
+                  window.open(url, '_blank');
                 }
               }}
             >
@@ -303,15 +304,15 @@ export const PropertyCard = ({
         )}
 
         {/* Conditionally show verification status */}
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
-          <Typography variant="body2" color="text.secondary">
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+          <Typography variant='body2' color='text.secondary'>
             Verified:
           </Typography>
-          <Typography variant="body2">
+          <Typography variant='body2'>
             {property.verifier &&
-            property.verifier !== "0x0000000000000000000000000000000000000000"
-              ? "Yes"
-              : "No"}
+            property.verifier !== '0x0000000000000000000000000000000000000000'
+              ? 'Yes'
+              : 'No'}
           </Typography>
         </Box>
       </CardContent>

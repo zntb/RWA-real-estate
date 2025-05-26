@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { verifyProperty, isApprovedVerifier } from "../engine/VerifyProperty";
-import { useActiveAccount } from "../hooks/useActiveAccount";
+import React, { useState } from 'react';
+import { verifyProperty, isApprovedVerifier } from '../engine/VerifyProperty';
+import { useActiveAccount } from '../hooks/useActiveAccount';
 
 interface VerifyPropertyButtonProps {
   tokenId: number;
@@ -45,10 +45,11 @@ export const VerifyPropertyButton: React.FC<VerifyPropertyButtonProps> = ({
           onVerificationComplete();
         }
       } else {
-        setError(result.error || "Verification failed");
+        setError(result.error || 'Verification failed');
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      setError(err.message || "An error occurred while verifying the property");
+      setError(err.message || 'An error occurred while verifying the property');
     } finally {
       setIsLoading(false);
     }
@@ -57,7 +58,7 @@ export const VerifyPropertyButton: React.FC<VerifyPropertyButtonProps> = ({
   // Don't render anything if the property is already verified
   if (isVerified) {
     return (
-      <div className="verified-badge bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+      <div className='verified-badge bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium'>
         Verified
       </div>
     );
@@ -71,14 +72,14 @@ export const VerifyPropertyButton: React.FC<VerifyPropertyButtonProps> = ({
   return (
     <div>
       <button
-        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200 disabled:bg-gray-400"
+        className='bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200 disabled:bg-gray-400'
         onClick={handleVerify}
         disabled={isLoading || !address || isVerifier !== true}
       >
-        {isLoading ? "Verifying..." : "Verify Property"}
+        {isLoading ? 'Verifying...' : 'Verify Property'}
       </button>
 
-      {error && <div className="text-red-500 mt-2 text-sm">{error}</div>}
+      {error && <div className='text-red-500 mt-2 text-sm'>{error}</div>}
     </div>
   );
 };
