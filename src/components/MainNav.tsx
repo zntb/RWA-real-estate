@@ -15,29 +15,23 @@ export function MainNav() {
   const pathname = usePathname();
 
   return (
-    <div className='hidden md:flex items-center w-full'>
-      {/* Centered nav container */}
-      <div className='mx-auto'>
-        <div className='flex items-center space-x-6'>
-          {navItems.map(item => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'text-sm font-medium transition-colors hover:text-primary',
-                pathname === item.href
-                  ? 'text-foreground'
-                  : 'text-foreground/60',
-              )}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
+    <div className='hidden md:flex items-center justify-between w-full'>
+      <div className='flex items-center space-x-6'>
+        {navItems.map(item => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={cn(
+              'text-sm font-medium transition-colors hover:text-primary',
+              pathname === item.href ? 'text-foreground' : 'text-foreground/60',
+            )}
+          >
+            {item.label}
+          </Link>
+        ))}
       </div>
 
-      {/* Mode toggle absolutely positioned on right */}
-      <div className='ml-auto'>
+      <div className='ml-4'>
         <ModeToggle />
       </div>
     </div>
