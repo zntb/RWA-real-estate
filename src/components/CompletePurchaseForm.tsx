@@ -1,106 +1,81 @@
-import { useState, useEffect } from "react";
-import { completePurchase } from "../engine/CompletePurchase";
-import { getPendingPurchase } from "../engine/GetPendingPurchase";
-import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Paper,
-  Divider,
-  Alert,
-  AlertTitle,
-  Stack,
-  InputAdornment,
-  CircularProgress,
-  Tooltip,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
-  FormControl,
-  FormLabel,
-} from "@mui/material";
-import DoneAllIcon from "@mui/icons-material/DoneAll";
-import InfoIcon from "@mui/icons-material/Info";
+'use client';
+
+import { useState, useEffect } from 'react';
+import { completePurchase } from '../engine/CompletePurchase';
+import { getPendingPurchase } from '../engine/GetPendingPurchase';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { Info, Loader2, CheckCheck } from 'lucide-react';
 
 export function CompletePurchaseForm() {
-  const [tokenId, setTokenId] = useState("");
+  const [tokenId, setTokenId] = useState('');
   const [success, setSuccess] = useState<boolean>(true);
-  const [reason, setReason] = useState("");
+  const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [txHash, setTxHash] = useState("");
-  const [error, setError] = useState("");
+  const [txHash, setTxHash] = useState('');
+  const [error, setError] = useState('');
   const [pendingPurchase, setPendingPurchase] = useState<{
     exists: boolean;
     buyer: string;
     amount: bigint;
   } | null>(null);
 
-  const fetchPendingPurchase = async (id: string) => {
-    if (!id) return;
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (tokenId) {
+        fetchPendingPurchase(tokenId);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [tokenId]);
 
+  const fetchPendingPurchase = async (id: string) => {
     try {
       setIsLoading(true);
       setPendingPurchase(null);
-      setError("");
-
+      setError('');
       const tokenIdNumber = parseInt(id);
-      if (isNaN(tokenIdNumber)) {
-        throw new Error("Token ID must be a valid number");
-      }
-
+      if (isNaN(tokenIdNumber))
+        throw new Error('Token ID must be a valid number');
       const purchase = await getPendingPurchase(tokenIdNumber);
       setPendingPurchase(purchase);
-
-      if (!purchase.exists) {
-        setError("No pending purchase found for this property");
-      }
+      if (!purchase.exists)
+        setError('No pending purchase found for this property');
     } catch (err) {
-      console.error("Error fetching pending purchase:", err);
+      console.error('Error fetching pending purchase:', err);
       setError(
-        err instanceof Error ? err.message : "Failed to fetch pending purchase"
+        err instanceof Error ? err.message : 'Failed to fetch pending purchase',
       );
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Fetch pending purchase when token ID changes
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (tokenId) {
-        fetchPendingPurchase(tokenId);
-      }
-    }, 500); // Add debounce of 500ms
-
-    return () => clearTimeout(timer);
-  }, [tokenId]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError("");
-    setTxHash("");
+    setError('');
+    setTxHash('');
 
     try {
-      // Convert values to appropriate types
       const tokenIdNumber = parseInt(tokenId);
-
-      if (isNaN(tokenIdNumber)) {
-        throw new Error("Token ID must be a valid number");
-      }
-
-      if (!pendingPurchase?.exists) {
-        throw new Error("No pending purchase exists for this property");
-      }
+      if (isNaN(tokenIdNumber))
+        throw new Error('Token ID must be a valid number');
+      if (!pendingPurchase?.exists)
+        throw new Error('No pending purchase exists for this property');
 
       const hash = await completePurchase(tokenIdNumber, success, reason);
-      setTxHash(typeof hash === "string" ? hash : hash.transactionHash);
+      setTxHash(typeof hash === 'string' ? hash : hash.transactionHash);
     } catch (err) {
-      console.error("Error completing purchase:", err);
+      console.error('Error completing purchase:', err);
       setError(
-        err instanceof Error ? err.message : "Failed to complete purchase"
+        err instanceof Error ? err.message : 'Failed to complete purchase',
       );
     } finally {
       setIsSubmitting(false);
@@ -108,175 +83,139 @@ export function CompletePurchaseForm() {
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
-      <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-        <DoneAllIcon sx={{ fontSize: 30, mr: 2, color: "primary.main" }} />
-        <Typography variant="h5" component="h2" gutterBottom>
-          Complete Property Purchase
-        </Typography>
-      </Box>
+    <Card className='mt-6 p-6'>
+      <CardHeader className='flex flex-row items-center gap-3'>
+        <CheckCheck className='text-primary w-6 h-6' />
+        <h2 className='text-xl font-semibold'>Complete Property Purchase</h2>
+      </CardHeader>
 
-      <Divider sx={{ mb: 4 }} />
-
-      <Box component="form" onSubmit={handleSubmit} noValidate>
-        <Stack spacing={3}>
-          <TextField
-            fullWidth
-            label="Token ID"
-            type="number"
-            value={tokenId}
-            onChange={(e) => setTokenId(e.target.value)}
-            placeholder="1"
-            required
-            variant="outlined"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">🏠</InputAdornment>
-              ),
-              endAdornment: (
-                <Tooltip
-                  title="Enter the token ID of the property with a pending purchase"
-                  arrow
-                >
-                  <InfoIcon color="action" fontSize="small" />
-                </Tooltip>
-              ),
-            }}
-            helperText="Enter the token ID of the property to complete purchase"
-          />
+      <CardContent>
+        <form onSubmit={handleSubmit} className='space-y-6'>
+          <div>
+            <Label htmlFor='tokenId'>Token ID</Label>
+            <div className='relative'>
+              <Input
+                id='tokenId'
+                type='number'
+                placeholder='1'
+                value={tokenId}
+                onChange={e => setTokenId(e.target.value)}
+                required
+              />
+              <Info
+                className='absolute right-2 top-2 h-4 w-4 text-muted-foreground'
+                title='Enter the token ID of the property'
+              />
+            </div>
+            <p className='text-sm text-muted-foreground mt-1'>
+              Enter the token ID of the property to complete purchase.
+            </p>
+          </div>
 
           {isLoading && (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
-              <CircularProgress size={24} />
-            </Box>
+            <div className='flex justify-center'>
+              <Loader2 className='h-5 w-5 animate-spin text-primary' />
+            </div>
           )}
 
           {pendingPurchase && pendingPurchase.exists && (
-            <Paper
-              variant="outlined"
-              sx={{ p: 2, bgcolor: "rgba(0, 0, 0, 0.02)" }}
-            >
-              <Typography variant="subtitle2" gutterBottom>
-                Pending Purchase Details:
-              </Typography>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                <Box>
-                  <Typography variant="body2">
-                    <strong>Buyer:</strong> {pendingPurchase.buyer}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="body2">
-                    <strong>Amount:</strong> {pendingPurchase.amount.toString()}{" "}
-                    wei
-                  </Typography>
-                </Box>
-              </Box>
-            </Paper>
+            <Card className='bg-muted/30 border'>
+              <CardContent className='space-y-1 py-3'>
+                <p className='text-sm font-medium'>Pending Purchase Details:</p>
+                <p className='text-sm'>
+                  <strong>Buyer:</strong> {pendingPurchase.buyer}
+                </p>
+                <p className='text-sm'>
+                  <strong>Amount:</strong> {pendingPurchase.amount.toString()}{' '}
+                  wei
+                </p>
+              </CardContent>
+            </Card>
           )}
 
-          <FormControl component="fieldset">
-            <FormLabel component="legend">Purchase Decision</FormLabel>
+          <div>
+            <Label>Purchase Decision</Label>
             <RadioGroup
-              name="purchase-decision"
-              value={success ? "approve" : "reject"}
-              onChange={(e) => setSuccess(e.target.value === "approve")}
+              defaultValue={success ? 'approve' : 'reject'}
+              onValueChange={val => setSuccess(val === 'approve')}
+              className='space-y-2 mt-2'
             >
-              <FormControlLabel
-                value="approve"
-                control={<Radio />}
-                label="Approve and complete purchase"
-              />
-              <FormControlLabel
-                value="reject"
-                control={<Radio />}
-                label="Reject purchase"
-              />
+              <div className='flex items-center space-x-2'>
+                <RadioGroupItem value='approve' id='approve' />
+                <Label htmlFor='approve'>Approve and complete purchase</Label>
+              </div>
+              <div className='flex items-center space-x-2'>
+                <RadioGroupItem value='reject' id='reject' />
+                <Label htmlFor='reject'>Reject purchase</Label>
+              </div>
             </RadioGroup>
-          </FormControl>
+          </div>
 
           {!success && (
-            <TextField
-              fullWidth
-              label="Rejection Reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="Reason for rejecting the purchase"
-              variant="outlined"
-              multiline
-              rows={2}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">📝</InputAdornment>
-                ),
-              }}
-              helperText="Enter the reason for rejecting this purchase (optional)"
-            />
+            <div>
+              <Label htmlFor='reason'>Rejection Reason</Label>
+              <Textarea
+                id='reason'
+                placeholder='Reason for rejecting the purchase'
+                rows={2}
+                value={reason}
+                onChange={e => setReason(e.target.value)}
+              />
+              <p className='text-sm text-muted-foreground mt-1'>
+                Enter the reason for rejecting this purchase (optional).
+              </p>
+            </div>
           )}
 
           <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color={success ? "primary" : "error"}
-            size="large"
+            type='submit'
             disabled={isSubmitting || isLoading || !pendingPurchase?.exists}
-            sx={{ mt: 2, py: 1.5 }}
-            startIcon={
-              isSubmitting ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : null
-            }
+            className='w-full py-2'
+            variant={success ? 'default' : 'destructive'}
           >
-            {isSubmitting
-              ? "Processing..."
-              : !pendingPurchase?.exists
-              ? "No Pending Purchase"
-              : success
-              ? "Complete Purchase"
-              : "Reject Purchase"}
+            {isSubmitting ? (
+              <>
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                Processing...
+              </>
+            ) : !pendingPurchase?.exists ? (
+              'No Pending Purchase'
+            ) : success ? (
+              'Complete Purchase'
+            ) : (
+              'Reject Purchase'
+            )}
           </Button>
-        </Stack>
-      </Box>
 
-      <Stack spacing={2} sx={{ mt: 4 }}>
-        {error && (
-          <Alert severity="error" variant="outlined">
-            <AlertTitle>Error</AlertTitle>
-            {error}
-          </Alert>
-        )}
+          {error && (
+            <Alert variant='destructive'>
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-        {txHash && (
-          <Alert severity={success ? "success" : "info"} variant="outlined">
-            <AlertTitle>
-              {success ? "Purchase Completed!" : "Purchase Rejected"}
-            </AlertTitle>
-            <Box sx={{ mt: 1 }}>
-              <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                Transaction hash:
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  wordBreak: "break-all",
-                  fontFamily: "monospace",
-                  bgcolor: "rgba(0, 0, 0, 0.04)",
-                  p: 1,
-                  borderRadius: 1,
-                }}
-              >
-                {txHash}
-              </Typography>
-              <Typography variant="body2" sx={{ mt: 2 }}>
-                {success
-                  ? "Purchase has been completed. The property ownership has been transferred and the payment has been sent to the seller."
-                  : "Purchase has been rejected. The buyer's funds have been refunded."}
-              </Typography>
-            </Box>
-          </Alert>
-        )}
-      </Stack>
-    </Paper>
+          {txHash && (
+            <Alert variant={success ? 'success' : 'default'}>
+              <AlertTitle>
+                {success ? 'Purchase Completed!' : 'Purchase Rejected'}
+              </AlertTitle>
+              <AlertDescription>
+                <div className='mt-2 text-sm font-semibold'>
+                  Transaction hash:
+                </div>
+                <div className='font-mono break-all bg-muted p-2 rounded mt-1'>
+                  {txHash}
+                </div>
+                <p className='mt-2 text-sm'>
+                  {success
+                    ? 'Purchase has been completed. The property ownership has been transferred and the payment has been sent to the seller.'
+                    : "Purchase has been rejected. The buyer's funds have been refunded."}
+                </p>
+              </AlertDescription>
+            </Alert>
+          )}
+        </form>
+      </CardContent>
+    </Card>
   );
 }

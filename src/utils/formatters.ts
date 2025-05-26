@@ -12,30 +12,30 @@ const ETH_PRICE_USD = 2100; // Current ETH price estimate
 export function formatWeiToETH(wei: bigint, decimals: number = 4): string {
   // Check if wei is undefined, null, or zero
   if (wei === undefined || wei === null || wei === BigInt(0)) {
-    return `0.${"0".repeat(decimals)} ETH`;
+    return `0.${'0'.repeat(decimals)} ETH`;
   }
 
   try {
     // Use string operations to safely convert from wei to ETH without precision loss
-    const weiValue = typeof wei === "bigint" ? wei : BigInt(String(wei));
+    const weiValue = typeof wei === 'bigint' ? wei : BigInt(String(wei));
     const weiString = weiValue.toString();
 
     // Handle values less than 1e18 (1 ETH)
     if (weiString.length <= 18) {
       // Pad with leading zeros to ensure we have at least 18 digits
-      const paddedWei = weiString.padStart(18, "0");
-      return `0.${paddedWei.slice(0, decimals).padEnd(decimals, "0")} ETH`;
+      const paddedWei = weiString.padStart(18, '0');
+      return `0.${paddedWei.slice(0, decimals).padEnd(decimals, '0')} ETH`;
     }
 
     // Handle values 1 ETH or greater
     const etherPart = weiString.slice(0, weiString.length - 18);
-    const weiPart = weiString.slice(weiString.length - 18).padStart(18, "0");
+    const weiPart = weiString.slice(weiString.length - 18).padStart(18, '0');
     const decimalPart = weiPart.slice(0, decimals);
 
     return `${etherPart}.${decimalPart} ETH`;
   } catch (e) {
-    console.error("Error formatting ETH value:", e);
-    return `0.${"0".repeat(decimals)} ETH`;
+    console.error('Error formatting ETH value:', e);
+    return `0.${'0'.repeat(decimals)} ETH`;
   }
 }
 
@@ -48,12 +48,12 @@ export function formatWeiToETH(wei: bigint, decimals: number = 4): string {
 export function formatWeiToUSD(wei: bigint, decimals: number = 2): string {
   // Check if wei is undefined, null, or zero
   if (wei === undefined || wei === null || wei === BigInt(0)) {
-    return `$0.${"0".repeat(decimals)}`;
+    return `$0.${'0'.repeat(decimals)}`;
   }
 
   try {
     // First convert to ETH using string operations to preserve precision
-    const weiValue = typeof wei === "bigint" ? wei : BigInt(String(wei));
+    const weiValue = typeof wei === 'bigint' ? wei : BigInt(String(wei));
     const weiString = weiValue.toString();
 
     let ethValueStr: string;
@@ -61,12 +61,12 @@ export function formatWeiToUSD(wei: bigint, decimals: number = 2): string {
     // Handle values less than 1e18 (1 ETH)
     if (weiString.length <= 18) {
       // Pad with leading zeros to ensure we have at least 18 digits
-      const paddedWei = weiString.padStart(18, "0");
+      const paddedWei = weiString.padStart(18, '0');
       ethValueStr = `0.${paddedWei}`;
     } else {
       // Handle values 1 ETH or greater
       const etherPart = weiString.slice(0, weiString.length - 18);
-      const weiPart = weiString.slice(weiString.length - 18).padStart(18, "0");
+      const weiPart = weiString.slice(weiString.length - 18).padStart(18, '0');
       ethValueStr = `${etherPart}.${weiPart}`;
     }
 
@@ -78,8 +78,8 @@ export function formatWeiToUSD(wei: bigint, decimals: number = 2): string {
 
     return `$${usdValue.toFixed(decimals)}`;
   } catch (e) {
-    console.error("Error formatting USD value:", e);
-    return `$0.${"0".repeat(decimals)}`;
+    console.error('Error formatting USD value:', e);
+    return `$0.${'0'.repeat(decimals)}`;
   }
 }
 
@@ -96,6 +96,6 @@ export function formatPrice(wei: bigint): {
   return {
     eth: formatWeiToETH(wei),
     usd: formatWeiToUSD(wei),
-    raw: wei.toString() + " wei",
+    raw: wei.toString() + ' wei',
   };
 }

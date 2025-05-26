@@ -1,42 +1,40 @@
-import { useState, useEffect } from "react";
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import {
-  Box,
-  Typography,
-  Paper,
-  Divider,
-  Grid,
-  CircularProgress,
-  Alert,
-  IconButton,
   Tooltip,
-  Link,
-} from "@mui/material";
-import CollectionsIcon from "@mui/icons-material/Collections";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import { PropertyCard } from "./PropertyCard";
-import type { Property } from "../engine/GetPropertiesUtils";
-import { getAllProperties } from "../engine/GetPropertiesUtils";
+  TooltipTrigger,
+  TooltipContent,
+} from '@/components/ui/tooltip';
+import { Skeleton } from '@/components/ui/skeleton';
+
+import { Image, RefreshCw } from 'lucide-react';
+import { PropertyCard } from './PropertyCard';
+import type { Property } from '../engine/GetPropertiesUtils';
+import { getAllProperties } from '../engine/GetPropertiesUtils';
 
 export function PropertyGrid() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(
-    null
+    null,
   );
 
-  // Fetch all properties on component mount
   const fetchProperties = async () => {
     setIsLoading(true);
     setError(null);
-
     try {
       const propertiesData = await getAllProperties();
-      console.log("Fetched properties:", propertiesData);
+      console.log('Fetched properties:', propertiesData);
       setProperties(propertiesData);
     } catch (err) {
-      console.error("Error fetching properties:", err);
-      setError("Failed to fetch properties. Please try again later.");
+      console.error('Error fetching properties:', err);
+      setError('Failed to fetch properties. Please try again later.');
     } finally {
       setIsLoading(false);
     }
@@ -50,158 +48,135 @@ export function PropertyGrid() {
     setSelectedProperty(
       selectedProperty?.propertyAddress === property.propertyAddress
         ? null
-        : property
+        : property,
     );
   };
 
-  // Convert IPFS URL to gateway URL
   const getIpfsUrl = (ipfsUrl: string): string => {
-    // Check if it's already an HTTP URL
-    if (ipfsUrl.startsWith("http")) {
-      return ipfsUrl;
-    }
-
-    // Get the client ID from env or use a default one
-    const clientId = import.meta.env.VITE_THIRDWEB_CLIENT_ID || "default";
-
-    // Handle ipfs:// protocol URLs
-    if (ipfsUrl.startsWith("ipfs://")) {
-      const ipfsHash = ipfsUrl.replace("ipfs://", "");
+    if (ipfsUrl.startsWith('http')) return ipfsUrl;
+    const clientId = process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || 'default';
+    if (ipfsUrl.startsWith('ipfs://')) {
+      const ipfsHash = ipfsUrl.replace('ipfs://', '');
       return `https://${clientId}.ipfscdn.io/ipfs/${ipfsHash}`;
     }
-
-    // Return as is if not an IPFS URL
     return ipfsUrl;
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          mb: 3,
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <CollectionsIcon
-            sx={{ fontSize: 30, mr: 2, color: "primary.main" }}
-          />
-          <Typography variant="h5" component="h2">
-            Real Estate Properties
-          </Typography>
-        </Box>
-        <Tooltip title="Refresh properties">
-          <IconButton onClick={fetchProperties} disabled={isLoading}>
-            {isLoading ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              <RefreshIcon />
-            )}
-          </IconButton>
-        </Tooltip>
-      </Box>
+    <Card className='p-6 mt-6'>
+      <div className='flex items-center justify-between mb-6'>
+        <div className='flex items-center gap-2'>
+          <Image className='w-7 h-7 text-primary' />
+          <h2 className='text-2xl font-semibold'>Real Estate Properties</h2>
+        </div>
 
-      <Divider sx={{ mb: 4 }} />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant='outline'
+              size='icon'
+              onClick={fetchProperties}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <RefreshCw className='w-5 h-5 animate-spin' />
+              ) : (
+                <RefreshCw className='w-5 h-5' />
+              )}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Refresh properties</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+
+      <Separator className='mb-6' />
 
       {isLoading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
-          <CircularProgress />
-        </Box>
+        <div className='flex justify-center my-6'>
+          <Skeleton className='w-12 h-12 rounded-full' />
+        </div>
       ) : error ? (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
+        <Alert variant='destructive' className='mb-4'>
+          <AlertTitle>{error}</AlertTitle>
         </Alert>
       ) : properties.length === 0 ? (
-        <Alert severity="info" sx={{ mb: 3 }}>
-          No properties found. Create some properties in the Admin section.
+        <Alert variant='default' className='mb-4'>
+          <AlertTitle>No properties found.</AlertTitle>
+          <p>Create some properties in the Admin section.</p>
         </Alert>
       ) : (
         <>
-          <Typography variant="h6" gutterBottom>
-            Showing {properties.length}{" "}
-            {properties.length === 1 ? "property" : "properties"}
-          </Typography>
+          <h3 className='text-lg font-medium mb-2'>
+            Showing {properties.length}{' '}
+            {properties.length === 1 ? 'property' : 'properties'}
+          </h3>
 
-          <Grid container spacing={3} sx={{ mt: 1 }}>
+          <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-2'>
             {properties.map((property, index) => (
-              <Grid
-                size={{ xs: 12, sm: 6, md: 4 }}
+              <PropertyCard
                 key={`${property.propertyAddress}-${index}`}
-              >
-                <PropertyCard
-                  property={property}
-                  onCardClick={handlePropertyClick}
-                  isSelected={
-                    selectedProperty?.propertyAddress ===
-                    property.propertyAddress
-                  }
-                />
-              </Grid>
+                property={property}
+                onCardClick={handlePropertyClick}
+                isSelected={
+                  selectedProperty?.propertyAddress === property.propertyAddress
+                }
+              />
             ))}
-          </Grid>
+          </div>
         </>
       )}
 
       {selectedProperty && (
-        <Box sx={{ mt: 4 }}>
-          <Divider sx={{ mb: 2 }} />
-          <Typography variant="h6" gutterBottom>
-            Selected Property
-          </Typography>
-          <Box
-            sx={{
-              p: 2,
-              bgcolor: "background.paper",
-              borderRadius: 1,
-              border: "1px solid",
-              borderColor: "divider",
-            }}
-          >
-            <Typography variant="body1" gutterBottom>
+        <div className='mt-6'>
+          <Separator className='mb-4' />
+          <h3 className='text-lg font-semibold mb-3'>Selected Property</h3>
+          <div className='p-4 border rounded-md bg-muted'>
+            <p className='mb-2'>
               <strong>Address:</strong> {selectedProperty.propertyAddress}
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              <strong>Price:</strong> {Number(selectedProperty.price) / 1e18}{" "}
+            </p>
+            <p className='mb-2'>
+              <strong>Price:</strong> {Number(selectedProperty.price) / 1e18}{' '}
               ETH
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              <strong>Area:</strong> {selectedProperty.squareMeters.toString()}{" "}
+            </p>
+            <p className='mb-2'>
+              <strong>Area:</strong> {selectedProperty.squareMeters.toString()}{' '}
               m²
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              <strong>Legal Identifier:</strong>{" "}
+            </p>
+            <p className='mb-2'>
+              <strong>Legal Identifier:</strong>{' '}
               {selectedProperty.legalIdentifier}
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              <strong>Document Hash:</strong>{" "}
-              {selectedProperty.documentHash.startsWith("ipfs://") ? (
-                <Link
+            </p>
+            <p className='mb-2'>
+              <strong>Document Hash:</strong>{' '}
+              {selectedProperty.documentHash.startsWith('ipfs://') ? (
+                <a
                   href={getIpfsUrl(selectedProperty.documentHash)}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='underline text-primary'
                 >
                   View Documents
-                </Link>
+                </a>
               ) : (
                 selectedProperty.documentHash
               )}
-            </Typography>
-            <Typography variant="body1">
-              <strong>Verification Status:</strong>{" "}
+            </p>
+            <p>
+              <strong>Verification Status:</strong>{' '}
               {selectedProperty.verifier &&
               selectedProperty.verifier !==
-                "0x0000000000000000000000000000000000000000"
+                '0x0000000000000000000000000000000000000000'
                 ? `Verified by ${selectedProperty.verifier.substring(
                     0,
-                    6
+                    6,
                   )}...${selectedProperty.verifier.substring(38)}`
-                : "Not Verified"}
-            </Typography>
-          </Box>
-        </Box>
+                : 'Not Verified'}
+            </p>
+          </div>
+        </div>
       )}
-    </Paper>
+    </Card>
   );
 }

@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useEffect, useState } from 'react';
 import { verifyProperty, isApprovedVerifier } from '../engine/VerifyProperty';
 import { useActiveAccount } from '../hooks/useActiveAccount';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface VerifyPropertyButtonProps {
   tokenId: number;
@@ -18,8 +21,7 @@ export const VerifyPropertyButton: React.FC<VerifyPropertyButtonProps> = ({
   const [isVerifier, setIsVerifier] = useState<boolean | null>(null);
   const { address } = useActiveAccount();
 
-  // Check if the current user is an approved verifier
-  React.useEffect(() => {
+  useEffect(() => {
     const checkVerifierStatus = async () => {
       if (address) {
         const verifierStatus = await isApprovedVerifier(address);
@@ -38,16 +40,11 @@ export const VerifyPropertyButton: React.FC<VerifyPropertyButtonProps> = ({
 
     try {
       const result = await verifyProperty(tokenId);
-
       if (result.success) {
-        // Notify parent component of successful verification
-        if (onVerificationComplete) {
-          onVerificationComplete();
-        }
+        onVerificationComplete?.();
       } else {
         setError(result.error || 'Verification failed');
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || 'An error occurred while verifying the property');
     } finally {
@@ -55,31 +52,25 @@ export const VerifyPropertyButton: React.FC<VerifyPropertyButtonProps> = ({
     }
   };
 
-  // Don't render anything if the property is already verified
   if (isVerified) {
-    return (
-      <div className='verified-badge bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium'>
-        Verified
-      </div>
-    );
+    return <Badge className='text-sm'>Verified</Badge>;
   }
 
-  // Don't render the button if the user is not an approved verifier
   if (isVerifier === false) {
     return null;
   }
 
   return (
     <div>
-      <button
-        className='bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200 disabled:bg-gray-400'
+      <Button
         onClick={handleVerify}
         disabled={isLoading || !address || isVerifier !== true}
+        variant='default'
       >
         {isLoading ? 'Verifying...' : 'Verify Property'}
-      </button>
+      </Button>
 
-      {error && <div className='text-red-500 mt-2 text-sm'>{error}</div>}
+      {error && <p className='text-sm text-red-500 mt-2'>{error}</p>}
     </div>
   );
 };

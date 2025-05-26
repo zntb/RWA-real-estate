@@ -1,46 +1,43 @@
-import { useState } from "react";
-import { removeVerifier } from "../engine/RemoveVerifier";
+'use client';
+
+import { useState } from 'react';
+import { removeVerifier } from '../engine/RemoveVerifier';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertTitle } from '@/components/ui/alert';
+import { Label } from '@/components/ui/label';
 import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Paper,
-  Divider,
-  Alert,
-  AlertTitle,
-  Stack,
-  InputAdornment,
-  CircularProgress,
-  Tooltip,
-} from "@mui/material";
-import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
-import InfoIcon from "@mui/icons-material/Info";
+  Info,
+  MinusIcon as PersonMinus,
+  Loader2,
+  AlertCircle,
+  ShieldOff,
+} from 'lucide-react';
 
 export function RemoveVerifierForm() {
-  const [verifierAddress, setVerifierAddress] = useState("");
+  const [verifierAddress, setVerifierAddress] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [txHash, setTxHash] = useState("");
-  const [error, setError] = useState("");
+  const [txHash, setTxHash] = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError("");
-    setTxHash("");
+    setError('');
+    setTxHash('');
 
     try {
-      // Check if address looks valid (simple check)
-      if (!verifierAddress.startsWith("0x") || verifierAddress.length !== 42) {
-        throw new Error("Please enter a valid Ethereum address");
+      if (!verifierAddress.startsWith('0x') || verifierAddress.length !== 42) {
+        throw new Error('Please enter a valid Ethereum address');
       }
 
       const hash = await removeVerifier(verifierAddress);
-      setTxHash(typeof hash === "string" ? hash : hash.transactionHash);
+      setTxHash(typeof hash === 'string' ? hash : hash.transactionHash);
     } catch (err) {
-      console.error("Error removing verifier:", err);
+      console.error('Error removing verifier:', err);
       setError(
-        err instanceof Error ? err.message : "Failed to remove verifier"
+        err instanceof Error ? err.message : 'Failed to remove verifier',
       );
     } finally {
       setIsSubmitting(false);
@@ -48,92 +45,76 @@ export function RemoveVerifierForm() {
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
-      <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-        <PersonRemoveIcon sx={{ fontSize: 30, mr: 2, color: "primary.main" }} />
-        <Typography variant="h5" component="h2" gutterBottom>
-          Remove Verifier
-        </Typography>
-      </Box>
+    <Card className='p-6 mt-6 justify-center max-w-3xl mx-auto'>
+      <div className='flex items-center mb-4 space-x-2'>
+        <PersonMinus className='text-red-600 w-6 h-6' />
+        <h2 className='text-xl font-semibold'>Remove Verifier</h2>
+      </div>
 
-      <Divider sx={{ mb: 4 }} />
+      <div className='border-b mb-6' />
 
-      <Box component="form" onSubmit={handleSubmit} noValidate>
-        <Stack spacing={3}>
-          <TextField
-            fullWidth
-            label="Verifier Address"
-            value={verifierAddress}
-            onChange={(e) => setVerifierAddress(e.target.value)}
-            placeholder="0x..."
-            required
-            variant="outlined"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">👤</InputAdornment>
-              ),
-              endAdornment: (
-                <Tooltip
-                  title="Ethereum address of the verifier to remove"
-                  arrow
-                >
-                  <InfoIcon color="action" fontSize="small" />
-                </Tooltip>
-              ),
-            }}
-            helperText="Enter the wallet address to revoke verification privileges"
-          />
+      <form onSubmit={handleSubmit} className='space-y-4'>
+        <div className='space-y-2'>
+          <Label htmlFor='verifier-address'>Verifier Address</Label>
+          <div className='relative'>
+            <span className='absolute left-3 top-1.5'>👤</span>
+            <Input
+              id='verifier-address'
+              value={verifierAddress}
+              onChange={e => setVerifierAddress(e.target.value)}
+              placeholder='0x...'
+              className='px-10'
+              required
+            />
+            {/* <Info
+              className='absolute right-3 top-2.5 w-4 h-4 text-muted-foreground'
+              // title='Ethereum address of the verifier to remove'
+            /> */}
+          </div>
+          <p className='text-sm text-muted-foreground'>
+            Enter the wallet address to revoke verification privileges
+          </p>
+        </div>
 
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="error"
-            size="large"
-            disabled={isSubmitting}
-            sx={{ mt: 2, py: 1.5 }}
-            startIcon={
-              isSubmitting ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : null
-            }
-          >
-            {isSubmitting ? "Processing..." : "Remove Verifier"}
-          </Button>
-        </Stack>
-      </Box>
+        <Button
+          type='submit'
+          variant='destructive'
+          className='w-full py-5 text-base'
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+              Processing...
+            </>
+          ) : (
+            'Remove Verifier'
+          )}
+        </Button>
+      </form>
 
-      <Stack spacing={2} sx={{ mt: 4 }}>
+      <div className='mt-6 space-y-4'>
         {error && (
-          <Alert severity="error" variant="outlined">
+          <Alert variant='destructive'>
+            <AlertCircle className='h-4 w-4' />
             <AlertTitle>Error</AlertTitle>
-            {error}
+            <div className='text-sm'>{error}</div>
           </Alert>
         )}
 
         {txHash && (
-          <Alert severity="success" variant="outlined">
+          <Alert variant='success'>
+            <ShieldOff className='h-4 w-4 text-green-500' />
             <AlertTitle>Verifier Removed Successfully!</AlertTitle>
-            <Box sx={{ mt: 1 }}>
-              <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                Transaction hash:
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  wordBreak: "break-all",
-                  fontFamily: "monospace",
-                  bgcolor: "rgba(0, 0, 0, 0.04)",
-                  p: 1,
-                  borderRadius: 1,
-                }}
-              >
+            <div className='mt-2'>
+              <div className='text-sm font-semibold'>Transaction hash:</div>
+              <div className='bg-muted px-3 py-2 rounded text-xs font-mono break-all'>
                 {txHash}
-              </Typography>
-            </Box>
+              </div>
+            </div>
           </Alert>
         )}
-      </Stack>
-    </Paper>
+      </div>
+    </Card>
   );
 }

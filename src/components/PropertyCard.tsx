@@ -1,24 +1,17 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  CardMedia,
-  Chip,
-  Divider,
-} from '@mui/material';
-import HouseIcon from '@mui/icons-material/House';
-import VerifiedIcon from '@mui/icons-material/Verified';
-import type { Property } from '../engine/GetPropertiesUtils';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
+import { Property } from '../engine/GetPropertiesUtils';
+import { CheckCircle2, Home } from 'lucide-react';
 
-// Map from PropertyState enum values to human-readable status and colors
 const propertyStates = {
-  0: { label: 'Initial Offering', color: 'info' },
-  1: { label: 'For Sale', color: 'success' },
-  2: { label: 'Pending Sale', color: 'warning' },
-  3: { label: 'Sold', color: 'error' },
-  4: { label: 'Not For Sale', color: 'default' },
+  0: { label: 'Initial Offering', color: 'bg-sky-500' },
+  1: { label: 'For Sale', color: 'bg-green-500' },
+  2: { label: 'Pending Sale', color: 'bg-yellow-500' },
+  3: { label: 'Sold', color: 'bg-red-500' },
+  4: { label: 'Not For Sale', color: 'bg-muted' },
 };
 
 interface PropertyCardProps {
@@ -27,14 +20,11 @@ interface PropertyCardProps {
   isSelected?: boolean;
 }
 
-// Helper function to convert IPFS URLs to CDN URLs
 const convertIPFSToCDN = (ipfsUrl: string): string => {
-  const clientId = import.meta.env.VITE_THIRDWEB_CLIENT_ID;
+  const clientId = process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID;
   return ipfsUrl.replace('ipfs://', `https://${clientId}.ipfscdn.io/ipfs/`);
 };
 
-// Helper function to fetch metadata from IPFS
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const fetchMetadataFromIPFS = async (ipfsUri: string): Promise<any> => {
   try {
     const url = convertIPFSToCDN(ipfsUri);
@@ -51,63 +41,32 @@ export const PropertyCard = ({
   onCardClick,
   isSelected = false,
 }: PropertyCardProps) => {
-  // State to track image loading status
   const [imageError, setImageError] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string>('');
+  const [imageUrl, setImageUrl] = useState('');
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
 
-  // Load and process the metadata
   useEffect(() => {
     if (!property.imageURI) {
       setImageUrl('');
       return;
     }
-
     const loadImage = async () => {
       setIsLoadingMetadata(true);
-      console.log('Raw imageURI:', property.imageURI);
-
       try {
-        // First check if the imageURI is a direct IPFS path
         if (property.imageURI.startsWith('ipfs://')) {
-          // Try to fetch metadata first - the URI might point to a metadata JSON
           try {
             const metadata = await fetchMetadataFromIPFS(property.imageURI);
-            console.log('Fetched metadata:', metadata);
-
-            // Check for expected metadata structure
-            if (metadata && metadata.data && metadata.data.image) {
-              const url = convertIPFSToCDN(metadata.data.image);
-              console.log('Using metadata.data.image URL:', url);
-              setImageUrl(url);
-            } else if (metadata && metadata.image) {
-              const url = convertIPFSToCDN(metadata.image);
-              console.log('Using metadata.image URL:', url);
-              setImageUrl(url);
+            if (metadata?.data?.image) {
+              setImageUrl(convertIPFSToCDN(metadata.data.image));
+            } else if (metadata?.image) {
+              setImageUrl(convertIPFSToCDN(metadata.image));
             } else {
-              // Just use the original URI as the image source
-              const url = convertIPFSToCDN(property.imageURI);
-              console.log(
-                'Using direct imageURI URL (no image in metadata):',
-                url,
-              );
-              setImageUrl(url);
+              setImageUrl(convertIPFSToCDN(property.imageURI));
             }
-          } catch (metadataError) {
-            console.log(
-              'Error fetching metadata, using URI directly:',
-              metadataError,
-            );
-            const url = convertIPFSToCDN(property.imageURI);
-            console.log(
-              'Using direct imageURI URL (failed to fetch metadata):',
-              url,
-            );
-            setImageUrl(url);
+          } catch {
+            setImageUrl(convertIPFSToCDN(property.imageURI));
           }
         } else {
-          // Non-IPFS URI, use directly
-          console.log('Using non-IPFS imageURI directly:', property.imageURI);
           setImageUrl(property.imageURI);
         }
       } catch (error) {
@@ -116,180 +75,100 @@ export const PropertyCard = ({
         setIsLoadingMetadata(false);
       }
     };
-
     loadImage();
     setImageError(false);
   }, [property.imageURI]);
 
-  // Log the final image URL when it changes
-  useEffect(() => {
-    console.log('Final image URL being used:', imageUrl);
-  }, [imageUrl]);
-
-  // Format Ethereum price for display with proper decimals
-  const formatEthPrice = (price: bigint): string => {
-    // Convert to a string showing proper ETH value (convert wei to ETH)
-    return `${Number(price) / 1e18} ETH`;
-  };
-
-  // Get property state info
+  const formatEthPrice = (price: bigint): string =>
+    `${Number(price) / 1e18} ETH`;
   const stateInfo = propertyStates[
     property.state as keyof typeof propertyStates
-  ] || { label: 'Unknown', color: 'default' };
+  ] || {
+    label: 'Unknown',
+    color: 'bg-muted',
+  };
 
   return (
     <Card
-      variant='outlined'
-      sx={{
-        height: '100%',
-        cursor: onCardClick ? 'pointer' : 'default',
-        border: isSelected ? '2px solid' : '1px solid',
-        borderColor: isSelected ? 'primary.main' : 'divider',
-        transition: 'transform 0.2s ease-in-out',
-        '&:hover': onCardClick ? { transform: 'scale(1.02)' } : {},
-        position: 'relative',
-        overflow: 'visible',
-      }}
+      className={cn(
+        'relative overflow-visible transition-transform duration-200',
+        isSelected ? 'border-primary border-2' : 'border border-muted',
+        onCardClick && 'cursor-pointer hover:scale-105',
+      )}
       onClick={() => onCardClick?.(property)}
     >
-      {/* Show verification status with badge */}
       {property.verifier &&
         property.verifier !== '0x0000000000000000000000000000000000000000' && (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: -10,
-              right: -10,
-              zIndex: 1,
-              backgroundColor: '#fff',
-              borderRadius: '50%',
-              boxShadow: 2,
-            }}
-          >
-            <VerifiedIcon color='primary' fontSize='medium' />
-          </Box>
+          <div className='absolute -top-2 -right-2 bg-emerald-600 rounded-full shadow p-1'>
+            <CheckCircle2 className='text-primary w-5 h-5' />
+          </div>
         )}
 
-      {/* Property Image or Placeholder */}
       {!imageError && imageUrl ? (
-        <CardMedia
-          component='img'
-          height='140'
-          image={imageUrl}
+        <img
+          src={imageUrl}
           alt={property.propertyAddress}
-          sx={{ objectFit: 'cover' }}
+          className='h-[140px] w-full object-cover'
           onError={() => setImageError(true)}
         />
       ) : (
-        <Box
-          sx={{
-            position: 'relative',
-            height: 140,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            bgcolor: 'action.hover',
-          }}
-        >
+        <div className='h-[140px] flex items-center justify-center bg-muted'>
           {isLoadingMetadata ? (
-            <Typography variant='body2' color='text.secondary'>
-              Loading...
-            </Typography>
+            <span className='text-muted-foreground text-sm'>Loading...</span>
           ) : (
-            <HouseIcon sx={{ fontSize: 80, color: 'text.secondary' }} />
+            <Home className='w-12 h-12 text-muted-foreground' />
           )}
-        </Box>
+        </div>
       )}
 
-      {/* Status Badge */}
-      <Chip
-        label={stateInfo.label}
-        color={
-          stateInfo.color as
-            | 'success'
-            | 'info'
-            | 'warning'
-            | 'error'
-            | 'default'
-        }
-        size='small'
-        sx={{
-          position: 'absolute',
-          top: 10,
-          right: 10,
-          fontWeight: 'bold',
-        }}
-      />
+      <Badge
+        className={cn(
+          'absolute top-2 right-2 text-white font-bold text-xs',
+          stateInfo.color,
+        )}
+      >
+        {stateInfo.label}
+      </Badge>
 
-      <CardContent>
-        {/* Property Address */}
-        <Typography
-          variant='h6'
-          gutterBottom
-          noWrap
+      <CardContent className='space-y-2'>
+        <h4
+          className='text-base font-semibold truncate'
           title={property.propertyAddress}
         >
           {property.propertyAddress}
-        </Typography>
+        </h4>
 
-        <Divider sx={{ my: 1 }} />
+        <Separator />
 
-        {/* Property Details */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-          <Typography variant='body2' color='text.secondary'>
-            Price:
-          </Typography>
-          <Typography variant='body2' fontWeight='bold'>
+        <div className='flex justify-between text-sm text-muted-foreground'>
+          <span>Price:</span>
+          <span className='font-medium text-foreground'>
             {formatEthPrice(property.price)}
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-          <Typography variant='body2' color='text.secondary'>
-            Area:
-          </Typography>
-          <Typography variant='body2'>
-            {property.squareMeters.toString()} m²
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-          <Typography variant='body2' color='text.secondary'>
-            Legal ID:
-          </Typography>
-          <Typography
-            variant='body2'
-            noWrap
-            sx={{ maxWidth: '150px' }}
+          </span>
+        </div>
+        <div className='flex justify-between text-sm text-muted-foreground'>
+          <span>Area:</span>
+          <span>{property.squareMeters.toString()} m²</span>
+        </div>
+        <div className='flex justify-between text-sm text-muted-foreground'>
+          <span>Legal ID:</span>
+          <span
+            className='truncate max-w-[150px]'
             title={property.legalIdentifier}
           >
             {property.legalIdentifier}
-          </Typography>
-        </Box>
+          </span>
+        </div>
 
-        {/* Document Hash */}
         {property.documentHash && (
-          <Box
-            sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}
-          >
-            <Typography variant='body2' color='text.secondary'>
-              Document:
-            </Typography>
-            <Typography
-              variant='body2'
-              noWrap
-              sx={{
-                maxWidth: '150px',
-                cursor: property.documentHash.startsWith('ipfs://')
-                  ? 'pointer'
-                  : 'default',
-                color: property.documentHash.startsWith('ipfs://')
-                  ? 'primary.main'
-                  : 'text.primary',
-                textDecoration: property.documentHash.startsWith('ipfs://')
-                  ? 'underline'
-                  : 'none',
-              }}
+          <div className='flex justify-between text-sm text-muted-foreground'>
+            <span>Document:</span>
+            <span
+              className={cn(
+                'truncate max-w-[150px]',
+                property.documentHash.startsWith('ipfs://') &&
+                  'text-primary underline cursor-pointer',
+              )}
               title={property.documentHash}
               onClick={() => {
                 if (property.documentHash.startsWith('ipfs://')) {
@@ -299,22 +178,19 @@ export const PropertyCard = ({
               }}
             >
               View Document
-            </Typography>
-          </Box>
+            </span>
+          </div>
         )}
 
-        {/* Conditionally show verification status */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-          <Typography variant='body2' color='text.secondary'>
-            Verified:
-          </Typography>
-          <Typography variant='body2'>
+        <div className='flex justify-between text-sm text-muted-foreground'>
+          <span>Verified:</span>
+          <span>
             {property.verifier &&
             property.verifier !== '0x0000000000000000000000000000000000000000'
               ? 'Yes'
               : 'No'}
-          </Typography>
-        </Box>
+          </span>
+        </div>
       </CardContent>
     </Card>
   );

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { serverWallet } from "../engine/ServerWallet";
+import { useEffect, useState } from 'react';
+import { serverWallet } from '../engine/ServerWallet';
 
 interface UseActiveAccountResult {
   address: string | null;
@@ -30,7 +30,9 @@ export const useActiveAccount = (): UseActiveAccountResult => {
         setAddress(walletAddress);
       } catch (err) {
         setError(
-          err instanceof Error ? err : new Error("Failed to get wallet address")
+          err instanceof Error
+            ? err
+            : new Error('Failed to get wallet address'),
         );
       } finally {
         setIsLoading(false);

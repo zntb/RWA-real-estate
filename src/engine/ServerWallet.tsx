@@ -1,11 +1,9 @@
-import { client } from "../client";
-import { Engine } from "thirdweb";
+import { client } from '../client';
+import { Engine } from 'thirdweb';
 
 // Create the server wallet
 export const serverWallet = Engine.serverWallet({
   client,
-  address: import.meta.env.VITE_SERVER_WALLET_ADDRESS,
-  vaultAccessToken: import.meta.env.VITE_VAULT_ACCESS_TOKEN,
+  address: process.env.NEXT_PUBLIC_SERVER_WALLET_ADDRESS!,
+  vaultAccessToken: process.env.NEXT_PUBLIC_VAULT_ACCESS_TOKEN!,
 });
-
-

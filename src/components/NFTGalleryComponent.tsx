@@ -1,16 +1,13 @@
-import { useState } from 'react';
-import {
-  Box,
-  Typography,
-  Paper,
-  Divider,
-  Card,
-  CardContent,
-} from '@mui/material';
-import CollectionsIcon from '@mui/icons-material/Collections';
-import HouseIcon from '@mui/icons-material/House';
+'use client';
 
-// Mock data for display
+import { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Home, GalleryHorizontal } from 'lucide-react';
+import clsx from 'clsx';
+
 const mockNFTs = [
   {
     id: '1',
@@ -38,160 +35,82 @@ export function NFTGalleryComponent() {
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <CollectionsIcon sx={{ fontSize: 30, mr: 2, color: 'primary.main' }} />
-        <Typography variant='h5' component='h2' gutterBottom>
-          NFT Marketplace
-        </Typography>
-      </Box>
+    <div className='border rounded-lg p-6 mt-6 bg-white shadow-sm'>
+      <div className='flex items-center mb-4 space-x-3'>
+        <GalleryHorizontal className='text-primary h-6 w-6' />
+        <h2 className='text-xl font-semibold'>NFT Marketplace</h2>
+      </div>
 
-      <Divider sx={{ mb: 4 }} />
+      <Separator className='mb-4' />
 
-      <Typography variant='h6' gutterBottom>
-        Showing 1 - 2 of 2 properties
-      </Typography>
+      <h3 className='text-lg font-medium mb-2'>
+        Showing {mockNFTs.length > 0 ? `1 - ${mockNFTs.length}` : '0'} of{' '}
+        {mockNFTs.length} properties
+      </h3>
 
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
+      <div className='flex flex-wrap gap-4 mt-2'>
         {mockNFTs.map(nft => (
-          <Box
+          <div
             key={nft.id}
-            sx={{
-              width: {
-                xs: '100%',
-                sm: 'calc(50% - 8px)',
-                md: 'calc(50% - 8px)',
-              },
-            }}
+            className='w-full sm:w-[calc(50%-0.5rem)] md:w-[calc(50%-0.5rem)]'
           >
             <Card
-              variant='outlined'
-              sx={{
-                height: '100%',
-                cursor: 'pointer',
-                border: selectedNft === nft.id ? '2px solid' : '1px solid',
-                borderColor:
-                  selectedNft === nft.id ? 'primary.main' : 'divider',
-              }}
               onClick={() => handleCardClick(nft.id)}
+              className={clsx(
+                'cursor-pointer transition-all duration-200 border',
+                selectedNft === nft.id
+                  ? 'border-primary ring-2 ring-primary/20'
+                  : 'hover:border-primary/50',
+              )}
             >
-              <Box
-                sx={{
-                  position: 'relative',
-                  height: 140,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  bgcolor: 'action.hover',
-                }}
-              >
-                <HouseIcon sx={{ fontSize: 80, color: 'text.secondary' }} />
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 10,
-                    right: 10,
-                    bgcolor: 'success.main',
-                    color: 'white',
-                    px: 1,
-                    py: 0.5,
-                    borderRadius: 1,
-                    fontSize: '0.75rem',
-                    fontWeight: 'bold',
-                  }}
-                >
+              <div className='relative h-36 flex items-center justify-center bg-muted'>
+                <Home className='w-16 h-16 text-muted-foreground' />
+                <Badge className='absolute top-2 right-2 bg-green-600 text-white'>
                   For Sale
-                </Box>
-              </Box>
-              <CardContent>
-                <Typography variant='h6' gutterBottom>
-                  {nft.name}
-                </Typography>
+                </Badge>
+              </div>
 
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    mb: 1,
-                  }}
-                >
-                  <Typography variant='body2' color='text.secondary'>
-                    ID: #{nft.id}
-                  </Typography>
-                </Box>
+              <CardContent className='p-4 space-y-2'>
+                <h4 className='text-lg font-semibold'>{nft.name}</h4>
 
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    mb: 0.5,
-                  }}
-                >
-                  <Typography variant='body2' color='text.secondary'>
-                    Price:
-                  </Typography>
-                  <Typography variant='body2'>{nft.price}</Typography>
-                </Box>
-
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    mb: 0.5,
-                  }}
-                >
-                  <Typography variant='body2' color='text.secondary'>
-                    USD Value:
-                  </Typography>
-                  <Typography variant='body2'>{nft.usdValue}</Typography>
-                </Box>
-
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    mb: 0.5,
-                  }}
-                >
-                  <Typography variant='body2' color='text.secondary'>
-                    Area:
-                  </Typography>
-                  <Typography variant='body2'>{nft.area}</Typography>
-                </Box>
-
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant='body2' color='text.secondary'>
-                    ID:
-                  </Typography>
-                  <Typography variant='body2'>{nft.propertyId}</Typography>
-                </Box>
+                <div className='flex justify-between text-sm text-muted-foreground'>
+                  <span>ID:</span>
+                  <span>#{nft.id}</span>
+                </div>
+                <div className='flex justify-between text-sm'>
+                  <span className='text-muted-foreground'>Price:</span>
+                  <span>{nft.price}</span>
+                </div>
+                <div className='flex justify-between text-sm'>
+                  <span className='text-muted-foreground'>USD Value:</span>
+                  <span>{nft.usdValue}</span>
+                </div>
+                <div className='flex justify-between text-sm'>
+                  <span className='text-muted-foreground'>Area:</span>
+                  <span>{nft.area}</span>
+                </div>
+                <div className='flex justify-between text-sm'>
+                  <span className='text-muted-foreground'>Property ID:</span>
+                  <span>{nft.propertyId}</span>
+                </div>
               </CardContent>
             </Card>
-          </Box>
+          </div>
         ))}
-      </Box>
+      </div>
 
       {selectedNft && (
-        <Box sx={{ mt: 4, textAlign: 'center' }}>
-          <Paper
-            variant='outlined'
-            sx={{
-              p: 2,
-              display: 'inline-block',
-              minWidth: '200px',
-            }}
-          >
-            <Typography variant='body1' gutterBottom>
-              <strong>
-                {mockNFTs.find(nft => nft.id === selectedNft)?.name}
-              </strong>
-            </Typography>
-            <Typography variant='body2' color='primary'>
+        <div className='mt-6 text-center'>
+          <div className='border border-muted rounded-md px-4 py-3 inline-block bg-muted/40 shadow'>
+            <p className='text-base font-medium mb-1'>
+              {mockNFTs.find(nft => nft.id === selectedNft)?.name}
+            </p>
+            <Button variant='outline' size='sm'>
               BUY NOW
-            </Typography>
-          </Paper>
-        </Box>
+            </Button>
+          </div>
+        </div>
       )}
-    </Paper>
+    </div>
   );
 }

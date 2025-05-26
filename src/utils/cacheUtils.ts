@@ -9,9 +9,9 @@ const listeners: (() => void)[] = [];
  * Invalidates all data caches and forces components to refetch data
  */
 export function invalidateDataCache(): void {
-  console.log("Invalidating data cache and notifying all listeners");
+  console.log('Invalidating data cache and notifying all listeners');
   // Notify all listeners
-  listeners.forEach((listener) => listener());
+  listeners.forEach(listener => listener());
 }
 
 /**
