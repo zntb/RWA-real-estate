@@ -7,6 +7,7 @@ import { client } from '../client';
 /**
  * Creates a new property NFT token in the RWA contract
  *
+ * @param propertyName - Name of the property
  * @param propertyAddress - The physical address of the property
  * @param price - The price in wei
  * @param squareMeters - The size in square meters
@@ -21,6 +22,7 @@ import { client } from '../client';
  * references are stored off-chain as IPFS URIs.
  */
 export const createNewProperty = async (
+  propertyName: string,
   propertyAddress: string,
   price: bigint,
   squareMeters: number,
@@ -30,6 +32,7 @@ export const createNewProperty = async (
 ) => {
   // Log the exact values being sent to the contract
   console.log('CREATING PROPERTY WITH RAW VALUES:', {
+    propertyName,
     propertyAddress,
     price: {
       value: price.toString(),
@@ -47,11 +50,12 @@ export const createNewProperty = async (
     const transaction = prepareContractCall({
       contract: rwaContract,
       method:
-        'function createProperty(string, uint256, uint256, string, string, string)',
+        'function createProperty(string,string, uint256, uint256, string, string, string)',
       params: [
+        propertyName,
         propertyAddress,
         price,
-        BigInt(squareMeters),
+        BigInt(Math.round(squareMeters)),
         legalIdentifier,
         documentHash,
         imageURI,

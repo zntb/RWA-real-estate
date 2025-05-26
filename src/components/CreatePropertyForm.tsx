@@ -183,10 +183,12 @@ export function CreatePropertyForm() {
       if (!formData.squareMeters || isNaN(Number(formData.squareMeters))) {
         throw new Error('Square meters must be a valid number');
       }
-      const squareMeters = Number(formData.squareMeters);
+      // Ensure it's a whole number by rounding
+      const squareMeters = Math.round(Number(formData.squareMeters));
 
       console.log('Minting new property with tokenURI:', tokenUri);
       const hash = await createNewProperty(
+        formData.propertyName,
         formData.propertyAddress,
         priceInWei,
         squareMeters,

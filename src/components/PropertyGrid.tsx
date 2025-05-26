@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Alert, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -102,9 +102,12 @@ export function PropertyGrid() {
           <AlertTitle>{error}</AlertTitle>
         </Alert>
       ) : properties.length === 0 ? (
-        <Alert variant='default' className='mb-4'>
+        <Alert variant='default' className='mb-4 text-center'>
           <AlertTitle>No properties found.</AlertTitle>
-          <p>Create some properties in the Admin section.</p>
+          <AlertDescription className='mt-2 mx-auto'>
+            It seems there are no properties registered yet. Please check back
+            later or contact support if you believe this is an error.
+          </AlertDescription>
         </Alert>
       ) : (
         <>

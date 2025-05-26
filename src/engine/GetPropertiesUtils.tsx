@@ -1,8 +1,9 @@
-import { rwaContract } from "./RWAcontract";
-import { readContract } from "thirdweb";
+import { rwaContract } from './RWAcontract';
+import { readContract } from 'thirdweb';
 
 // Define the Property type based on the contract structure
 export type Property = {
+  propertyName: string; // Optional, as not all properties may have a name
   propertyAddress: string;
   price: bigint;
   squareMeters: bigint;
@@ -21,13 +22,13 @@ export const getTotalProperties = async (): Promise<bigint> => {
   try {
     const totalProperties = await readContract({
       contract: rwaContract,
-      method: "function getTotalProperties() view returns (uint256)",
+      method: 'function getTotalProperties() view returns (uint256)',
       params: [],
     });
 
     return totalProperties;
   } catch (error) {
-    console.error("Error fetching total properties:", error);
+    console.error('Error fetching total properties:', error);
     throw error;
   }
 };
@@ -42,21 +43,22 @@ export const getProperty = async (tokenId: bigint): Promise<Property> => {
     const property = await readContract({
       contract: rwaContract,
       method:
-        "function getProperty(uint256) view returns ((string,uint256,uint256,string,string,uint8,address,string))",
+        'function getProperty(uint256) view returns ((string,string,uint256,uint256,string,string,uint8,address,string))',
       params: [tokenId],
     });
 
     // Convert the returned tuple to an object with named properties
     // The contract returns a struct which comes through as a tuple with numbered indices
     const propertyWithNamedFields = {
-      propertyAddress: property[0],
-      price: property[1],
-      squareMeters: property[2],
-      legalIdentifier: property[3],
-      documentHash: property[4],
-      state: property[5],
-      verifier: property[6],
-      imageURI: property[7], // In contract this is tokenURI, but we rename for clarity
+      propertyName: property[0],
+      propertyAddress: property[1],
+      price: property[2],
+      squareMeters: property[3],
+      legalIdentifier: property[4],
+      documentHash: property[5],
+      state: property[6],
+      verifier: property[7],
+      imageURI: property[8], // In contract this is tokenURI, but we rename for clarity
     };
 
     return propertyWithNamedFields;
@@ -75,27 +77,28 @@ export const getAllProperties = async (): Promise<Property[]> => {
     const properties = await readContract({
       contract: rwaContract,
       method:
-        "function getAllProperties() view returns ((string,uint256,uint256,string,string,uint8,address,string)[])",
+        'function getAllProperties() view returns ((string,string,uint256,uint256,string,string,uint8,address,string)[])',
       params: [],
     });
 
     // Map each property tuple to our Property type with named fields
     const propertiesWithNamedFields = Array.isArray(properties)
-      ? properties.map((property) => ({
-          propertyAddress: property[0],
-          price: property[1],
-          squareMeters: property[2],
-          legalIdentifier: property[3],
-          documentHash: property[4],
-          state: property[5],
-          verifier: property[6],
-          imageURI: property[7], // In contract this is tokenURI, but we rename for clarity
+      ? properties.map(property => ({
+          propertyName: property[0], // Optional, may be empty
+          propertyAddress: property[1],
+          price: property[2],
+          squareMeters: property[3],
+          legalIdentifier: property[4],
+          documentHash: property[5],
+          state: property[6],
+          verifier: property[7],
+          imageURI: property[8], // In contract this is tokenURI, but we rename for clarity
         }))
       : [];
 
     return propertiesWithNamedFields;
   } catch (error) {
-    console.error("Error fetching all properties:", error);
+    console.error('Error fetching all properties:', error);
     throw error;
   }
 };
@@ -111,12 +114,12 @@ export const demonstratePropertyGetters = async () => {
 
     // 2. Get all properties
     const allProperties = await getAllProperties();
-    console.log("All properties:", allProperties);
+    console.log('All properties:', allProperties);
 
     // 3. If properties exist, get details of the first one
     if (totalProperties > 0n) {
       const firstProperty = await getProperty(1n);
-      console.log("First property details:", firstProperty);
+      console.log('First property details:', firstProperty);
     }
 
     return {
@@ -124,7 +127,7 @@ export const demonstratePropertyGetters = async () => {
       allProperties,
     };
   } catch (error) {
-    console.error("Error in property getters demonstration:", error);
+    console.error('Error in property getters demonstration:', error);
     throw error;
   }
 };
