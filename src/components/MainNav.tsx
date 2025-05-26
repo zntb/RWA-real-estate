@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { ModeToggle } from './ModeToggle';
 
 const navItems = [
   { label: 'Home', href: '/' },
@@ -15,7 +14,7 @@ export function MainNav() {
   const pathname = usePathname();
 
   return (
-    <div className='hidden md:flex items-center justify-between w-full'>
+    <div className='hidden md:flex items-center justify-center flex-1'>
       <div className='flex items-center space-x-6'>
         {navItems.map(item => (
           <Link
@@ -29,10 +28,6 @@ export function MainNav() {
             {item.label}
           </Link>
         ))}
-      </div>
-
-      <div className='ml-4'>
-        <ModeToggle />
       </div>
     </div>
   );
